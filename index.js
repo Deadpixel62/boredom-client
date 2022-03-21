@@ -21,7 +21,7 @@ app.get('/', (req,res) => {
 
 
 
-mongoose.connect("mongodb+srv://Deadpixel62:popo0909@cluster0.xwll3.mongodb.net/boredom-api?retryWrites=true&w=majority", {
+mongoose.connect(Url, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
