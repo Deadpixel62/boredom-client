@@ -3,14 +3,17 @@ const app = express();
 const mongoose=require('mongoose');
 const cors = require('cors');
 app.use(cors());
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
 require("dotenv").config();
+app.use(express.json());
 const userRouter = require('./Routes/user.routes');
 const favRouter = require('./Routes/favList.routes');
 
 const Port = process.env.PORT || 4002;
 const Url = process.env.URL
 
-app.use(express.json());
+
 
 app.get('/', (req,res) => {
     res.send(`Server connected on Port ${Port}`)
@@ -18,7 +21,7 @@ app.get('/', (req,res) => {
 
 
 
-mongoose.connect(Url, {
+mongoose.connect("mongodb+srv://Deadpixel62:popo0909@cluster0.xwll3.mongodb.net/boredom-api?retryWrites=true&w=majority", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
