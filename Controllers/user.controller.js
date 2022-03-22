@@ -1,9 +1,14 @@
 const User = require('../Models/user.model');
-const favList = require('../Models/favList.model')
 const userController = {};
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const key = process.env.KEY
+
+
+userController.signUp = async (req, res) => {
+  const {email, password} = req.body;
+  if((email || password )) return res.status(400)
+}
 
 userController.signup = (req, res) => {
 
@@ -23,7 +28,7 @@ userController.signup = (req, res) => {
               password: hash
             });
 
-            //adding user with hashed password
+            //saving user with hashed password to database
             user.save().then(
               () => {
                 res.status(201).json({
@@ -62,7 +67,7 @@ userController.login = (req, res, next) => {
           const token = jwt.sign(
             { userId: user._id },
             key,
-            { expiresIn: '24h' });
+            { expiresIn: 12600 });
 
           res.status(200).json({
             userId:user._id,
@@ -84,7 +89,45 @@ userController.login = (req, res, next) => {
       })
     }
   )
-}        
+};
+
+//Another way to write a login function:
+
+userController.logIn = (req, res) => {
+  const {email, password} = req.body;
+  //simple validation:
+  if(!email || !password) {
+    return res.status(400).json({msg : 'please enter all fields'});
+  }
+
+  // check for existing user:
+  User.findOne({email})
+  .then(user => {
+    if(!user) return res.status(400).json({msg : "user not found"});
+
+    bcrypt.compare(password, user.password)
+    .then(isMatch => {
+      if(!isMatch) return res.status(400).json({msg : "Invalid credentials"});
+
+      jwt.sign(
+        {userId : user._id},
+        key,
+        {expiresIn : 3600},
+        (err, token) => {
+          if(err) throw err;
+          res.status(200).json({
+            token,
+            user : {
+              userId : user._id,
+              email : user.email
+            }
+          })
+        }
+      )
+    })
+  })
+
+};
 
 userController.getUser = (req, res) => {
   let user;
@@ -92,7 +135,7 @@ userController.getUser = (req, res) => {
    user = User.findOne({_id : req.params.userId})
    .populate("favList")
    .then(user => {
-     res.status(201).json(user)
+     res.status(200).json(user)
    })
   } catch (error){
     res.status(500).json({
@@ -106,7 +149,7 @@ userController.getAllUsers = async function (req, res) {
   let users;
   try {
     users = await User.find().populate("favList")
-    res.send(users);
+    res.status(200).send(users);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -116,7 +159,7 @@ userController.addFavorite = async function (req, res) {
   let user;
   try {
     user = await User.updateOne({_id : req.body._id}, { $addToSet: { favList: req.body.activityId } });
-    res.status(201).json(user);
+    res.status(200).json(user);
   } catch (error) {
     res.status(500).send(error)
   }
@@ -131,7 +174,7 @@ userController.addFav = (req,res) => {
         });
       }
     User.updateOne({_id : req.body._id}, { $addToSet: { favList: req.body.activityId } });
-    res.sent(user)
+    res.status(200).send(user)
     }
   ).catch((error) => {
     res.status(500).json({
@@ -144,10 +187,11 @@ userController.removeFavorite = async function (req, res) {
   let user;
   try {
     user = await User.updateOne({_id: req.body._id}, {$pull : {favList : req.body.activityId}});
-    res.send(user)
+    res.status(200).send(user)
   } catch (error) {
     res.status(500).send(error);
   }
 };
+
 
 module.exports = userController;
