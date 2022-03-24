@@ -73,7 +73,9 @@ userController.loginAsync = async (req, res) => {
     const valid = bcrypt.compare(password, user.password);
     if (!valid)
       return res.status(401).json({ error: new Error("incorrect password") });
-    const token = jwt.sign({ userId: user._id }, key, { expiresIn: 12000 });
+    const token = jwt.sign({ userId: user._id, email: user.email }, key, {
+      expiresIn: 12000,
+    });
     return res.status(200).json({
       userId: user._id,
       token: token,
@@ -183,8 +185,8 @@ userController.addFavorite = async function (req, res) {
   let user;
   try {
     user = await User.updateOne(
-      { _id: req.body._id },
-      { $addToSet: { favList: req.body.activityId } }
+      { _id: req.params.userId },
+      { $addToSet: { favList: req.params.activityId } }
     );
     res.status(200).json(user);
   } catch (error) {
@@ -217,8 +219,8 @@ userController.removeFavorite = async function (req, res) {
   let user;
   try {
     user = await User.updateOne(
-      { _id: req.body._id },
-      { $pull: { favList: req.body.activityId } }
+      { _id: req.params.userId },
+      { $pull: { favList: req.params.activityId } }
     );
     res.status(200).send(user);
   } catch (error) {
