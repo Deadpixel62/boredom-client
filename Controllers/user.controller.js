@@ -185,8 +185,8 @@ userController.addFavorite = async function (req, res) {
   let user;
   try {
     user = await User.updateOne(
-      { _id: req.params.userId },
-      { $addToSet: { favList: req.params.activityId } }
+      { _id: req.body.userId },
+      { $addToSet: { favList: req.body.activityId } }
     );
     res.status(200).json(user);
   } catch (error) {
