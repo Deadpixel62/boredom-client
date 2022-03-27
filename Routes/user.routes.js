@@ -9,8 +9,8 @@ Router.get("/user/:userId", userController.getUser);
 Router.get("/users", userController.getAllUsers);
 Router.put("/users/:userId/fav/:activityId", userController.addFavorite);
 Router.put("/user/add", userController.addFav);
-Router.put(
-  "/users/removeFav/:userId/fav/:activityId",
+Router.delete(
+  "/users/removeFav",
 
   userController.removeFavorite
 );

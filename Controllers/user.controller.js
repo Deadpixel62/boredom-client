@@ -215,12 +215,25 @@ userController.addFav = (req, res) => {
     });
 };
 
+userController.removeFav = async function (req, res) {
+  let user;
+  try {
+    user = await User.updateOne(
+      { _id: req.body.userId },
+      { $pull: { favList: req.body.activityId } }
+    );
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
+
 userController.removeFavorite = async function (req, res) {
   let user;
   try {
     user = await User.updateOne(
-      { _id: req.params.userId },
-      { $pull: { favList: req.params.activityId } }
+      { _id: req.body.userId },
+      { $pull: { favList: req.body.activityId } }
     );
     res.status(200).send(user);
   } catch (error) {
