@@ -7,11 +7,7 @@ Router.post("/signup", userController.signup);
 Router.post("/login", userController.login);
 Router.get("/user/:userId", userController.getUser);
 Router.get("/users", userController.getAllUsers);
-Router.put("/users/addFavorite", userController.addFavorite);
-Router.delete(
-  "/users/removeFav",
-
-  userController.removeFavorite
-);
+Router.put("/users/addFavorite", auth, userController.addFavorite);
+Router.delete("/users/removeFav", auth, userController.removeFavorite);
 
 module.exports = Router;
