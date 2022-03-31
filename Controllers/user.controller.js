@@ -104,7 +104,7 @@ userController.login = (req, res, next) => {
             });
           }
           const token = jwt.sign({ userId: user._id }, key, {
-            expiresIn: 12600,
+            expiresIn: 30000,
           });
 
           res.status(200).json({
