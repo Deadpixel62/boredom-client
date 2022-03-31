@@ -7,6 +7,6 @@ Router.post("/addFav", auth, favController.addFav);
 Router.get("/getAllFav", favController.findAll);
 Router.get("/getFav/:type", favController.findByType);
 Router.get("/getAct/:activity", favController.findByName);
-Router.delete("/deleteFav", favController.deleteFav);
+Router.delete("/deleteFav", auth, favController.deleteFav);
 
 module.exports = Router;

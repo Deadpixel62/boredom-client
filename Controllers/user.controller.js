@@ -108,8 +108,7 @@ userController.login = (req, res, next) => {
           });
 
           res.status(200).json({
-            userId: user._id,
-            token: token,
+            token,
           });
         })
         .catch((error) => {
@@ -126,6 +125,21 @@ userController.login = (req, res, next) => {
 };
 
 //Another way to write a login function:
+
+userController.decodeToken = (req, res) => {
+  const token = req.headers.authorization;
+  jwt.verify(token, key, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({
+        error: err,
+      });
+    }
+    return res.status(200).json({
+      userId: decoded.userId,
+      email: decoded.email,
+    });
+  });
+};
 
 userController.logIn = (req, res) => {
   const { email, password } = req.body;
@@ -158,12 +172,13 @@ userController.logIn = (req, res) => {
 userController.getUser = (req, res) => {
   try {
     let user;
-    user = User.findOne({ _id: req.params.userId })
+    user = User.findOne({ _id: req.user.userId })
       .populate("favList")
       .then((user) => {
         res.status(200).json(user);
       });
   } catch (error) {
+    console.log(error);
     res.status(500).json({
       error: error,
     });
@@ -175,20 +190,20 @@ userController.getAllUsers = async function (req, res) {
   let users;
   try {
     users = await User.find().populate("favList");
-    res.status(200).send(users);
+    return res.status(200).send(users);
   } catch (error) {
     res.status(500).send(error);
   }
 };
 
 userController.addFavorite = async function (req, res) {
-  let user;
+  let users;
   try {
-    user = await User.updateOne(
-      { _id: req.body.userId },
+    users = await User.updateOne(
+      { _id: req.user.userId },
       { $addToSet: { favList: req.body.activityId } }
     );
-    res.status(200).json(user);
+    return res.status(200).json(users);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -214,6 +229,7 @@ userController.addFav = (req, res) => {
       });
     });
 };
+//addFav and removeFav  taken to favModel.
 
 userController.removeFav = async function (req, res) {
   let user;

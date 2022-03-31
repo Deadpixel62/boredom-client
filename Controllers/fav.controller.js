@@ -1,18 +1,30 @@
 const favList = require("../Models/favList.model");
+const User = require("../Models/user.model");
 const favController = {};
 
-favController.addFav = (req, res) => {
+favController.addFav = async (req, res) => {
   const newFav = new favList({
     activity: req.body.activity,
     type: req.body.type,
   });
   try {
-    newFav.save();
+    await newFav.save();
+    const activityId = newFav._id;
+    //************/
+
+    const user = await User.updateOne(
+      { _id: req.user.userId },
+      { $addToSet: { favList: activityId } }
+    );
+    //************/
+
     res.status(201).json({
       message: "fav added successfully",
       newFav,
+      user,
     });
-  } catch {
+  } catch (error) {
+    console.log(error);
     res.status(500).json({
       message: "Error occured while adding fav",
       error,
@@ -45,7 +57,7 @@ favController.findByType = (req, res) => {
           req.params.type,
       });
     }
-    res.send(product);
+    res.status(200).send(product);
   });
 };
 
@@ -87,8 +99,12 @@ favController.findByName = async function (req, res) {
 favController.deleteFav = async function (req, res) {
   let fav;
   try {
-    fav = await favList.deleteOne({ _id: req.body._id });
-    res.send(fav);
+    user = await User.updateOne(
+      { _id: req.user.userId },
+      { $pull: { favList: req.body.activityId } }
+    );
+    fav = await favList.deleteOne({ _id: req.body.activityId });
+    res.status(200).json({ fav, user });
   } catch (error) {
     res.status(500).send(error);
   }
